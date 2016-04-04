@@ -14,7 +14,7 @@ echo -e "Installing JDK and boilerplate stuff"
 sudo apt-get install -y cmake make tmux git \
 	vim htop xdot openjdk-7-jdk unzip gdb \
 	graphviz libgraphviz-dev python-setuptools python-dev \
-	libz-dev libncurses5-dev ant &> /dev/null
+	libz-dev libncurses5-dev ant execstack &> /dev/null
 
-sudo ln -s /vagrant/scripts/fetch.sh /usr/bin/fetch &> /dev/null
+sudo ln -s /vagrant/scripts/fetch.sh /usr/local/bin/fetch &> /dev/null
 echo -e "Provisioning done. Login to provisioned VM by doing 'vagrant ssh'"
