@@ -76,7 +76,7 @@ tar -xzf afl-crashes.tar.gz && rm afl-crashes.tar.gz
 echo -e "\t\t[+] Patching test-flows.c so it reads from file instead of stdin"
 patch -p1 test-flows.c < patch-testflows &> /dev/null
 echo -e "\t\t[+] Building OVS 2.3.2"
-cd .. && ./configure &> /dev/null && make &> /dev/null
+cd .. && CFLAGS="-O0 -g" ./configure &> /dev/null && make &> /dev/null
 
 echo -e "\t\t[+] Creating crash.log for OVS 2.3.2."
 echo -e "\t\t\t[+] This reads over 13000 crashing inputs, so it is going to take a while..."
@@ -88,8 +88,8 @@ let "count = 0"
 for crashing_input in \$(ls tests/SESSION*/crashes/id*); do
         let "count += 1"
         echo -e "--------- Crashing input no. \$count ----------"
-        gdb --silent -ex=r -ex=printfault -ex=bt -ex=exploitable \
-	-ex=quit --args ./tests/ovstest test-flows tests/flows \$crashing_input
+        gdb --silent -ex="r test-flows tests/flows "\$crashing_input" &> /dev/null" \
+	-ex=printfault -ex=bt -ex=exploitable -ex=quit --args ./tests/ovstest
         echo -e "----------------------------------------------"
         echo -e ""
 done
