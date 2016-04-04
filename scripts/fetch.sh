@@ -91,9 +91,9 @@ patch -p1 test-flows.c < patch-testflows &> /dev/null
 echo -e "\t\t[+] Building OVS 2.3.2"
 cd .. && CFLAGS="-O0 -g" ./configure &> /dev/null && make &> /dev/null
 
-echo -e "\t\t[+] Creating crash.log for OVS 2.3.2."
-echo -e "\t\t\t[+] This reads over 13000 crashing inputs, so it is going to take a while..."
-echo -e "\t\t\t[+] Abort mid way to see sample output"
+echo -e "\t\t[+] Creating sample crash.log for OVS 2.3.2."
+echo -e "\t\t\t[+] Please wait...This takes approximately 2 minutes"
+echo -e "\t\t\t[+] To obtain a full crash.log, run getcrashlog.sh till it returns"
 
 cat <<EOF >> getcrashlog.sh
 #!/usr/bin/env bash
@@ -101,12 +101,38 @@ let "count = 0"
 for crashing_input in \$(ls tests/SESSION*/crashes/id*); do
         let "count += 1"
         echo -e "--------- Crashing input no. \$count ----------"
-        gdb --silent -ex="r test-flows tests/flows "\$crashing_input" &> /dev/null" \
-	-ex=printfault -ex=bt -ex=exploitable -ex=quit --args ./tests/ovstest
+        gdb -q -ex="r test-flows tests/flows "\$crashing_input" &> /dev/null" -ex="echo \nProgram state:\n" -ex=printfault -ex="echo \nProgram back trace:\n" -ex=bt -ex="echo \nGDB exploitable info:\n" -ex=exploitable -ex=quit --args ./tests/ovstest
         echo -e "----------------------------------------------"
         echo -e ""
 done
 EOF
 chmod +x getcrashlog.sh
-./getcrashlog.sh &>> crash.log
+(timeout 100 ./getcrashlog.sh &>> crash.log)
+
+echo -e "\t\t[+] Fetching latest libosip (v4.1.0)"
+cd .. && wget https://ftp.gnu.org/gnu/osip/libosip2-4.1.0.tar.gz &> /dev/null
+tar -xzf libosip2-4.1.0.tar.gz && rm libosip2-4.1.0.tar.gz
+echo -e "\t\t[+] Building libosip"
+cd libosip2-4.1.0 && CFLAGS="-O0 -g" ./configure --enable-test &> /dev/null && make &> /dev/null
+cd src/test && make check &> /dev/null
+echo -e "\t\t[+] Fetching crashing inputs for torture_test"
+wget --no-check-certificate "https://owncloud.sec.t-labs.tu-berlin.de/owncloud/public.php?service=files&t=4b76def98a54a2a1a1a06df8c74980a3&download" -O afl-crashes.tar.gz &> /dev/null
+tar -xzf afl-crashes.tar.gz && rm afl-crashes.tar.gz
+echo -e "\t\t[+] Creating sample crash.log for libosip-4.1.0"
+echo -e "\t\t\t[+] Please wait...This takes approximately 2 minutes"
+echo -e "\t\t\t[+] To obtain a full crash.log, run getcrashlog.sh till it returns"
+
+cat <<EOF >> getcrashlog.sh
+#!/usr/bin/env bash
+let "count = 0"
+for crashing_input in \$(ls afl-out-clone/SESSION*/crashes/id*); do
+        let "count += 1"
+        echo -e "--------- Crashing input no. \$count ----------"
+        LD_PRELOAD="../osipparser2/.libs/libosipparser2.so" gdb -q -ex="r "\$crashing_input" 0 -c &> /dev/null" -ex="echo \nProgram state:\n" -ex=printfault -ex="echo \nProgram back trace:\n" -ex=bt -ex="echo \nGDB exploitable info:\n" -ex=exploitable -ex=quit --args .libs/torture_test
+        echo -e "----------------------------------------------"
+        echo -e ""
+done
+EOF
+chmod +x getcrashlog.sh
+(timeout 100 ./getcrashlog.sh &>> crash.log)
 fi
