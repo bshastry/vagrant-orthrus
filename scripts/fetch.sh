@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+
+if [ ! -e ~/.ssh/id_rsa ]; then
+echo -e "\t[+] Installing SecT gitlab deploy keys"
+tar xf /vagrant/deploy.tar -C ~/.ssh/
+fi
+
 if [ ! -e joern-0.3.1 ]; then
 echo -e "\t[+] Installing Joern"
 echo -e "\t\t[+] Installing Joern core"
@@ -46,6 +52,15 @@ cd joern-tools && sudo python2 setup.py install &> /dev/null
 cd ..
 fi
 
+if [ ! -e orthrus ]; then
+echo -e "\t\t[+] Installing orthrus"
+git clone git@gitlab.sec.t-labs.tu-berlin.de:mleutner/orthrus.git &> /dev/null
+echo -e "\t\t[+] Install gdb orthrus plugin"
+cd orthrus &> /dev/null
+sudo cp -r ./gdb-orthrus /usr/share/gdb/python/ &> /dev/null
+cd ..
+fi
+
 if [ ! -e afl* ]; then
 echo -e "\t[+] Installing afl-fuzz latest"
 wget http://lcamtuf.coredump.cx/afl/releases/afl-latest.tgz &> /dev/null
@@ -54,16 +69,19 @@ make -j &> /dev/null && sudo make install &> /dev/null && cd ..
 fi
 
 if [ ! -e exploitable ]; then
-echo -e "\t[+] Setting up gdb"
 echo -e "\t\t[+] Install gdb exploitable plugin"
 git clone https://github.com/jfoote/exploitable.git &> /dev/null
 cd exploitable && python setup.py build &> /dev/null
 sudo cp -r build/lib*/exploitable /usr/share/gdb/python/ &> /dev/null
 cd ..
+fi
 
+echo -e "\t[+] Setting up gdb"
 echo -e "\t\t[+] Setting up .gdbinit"
+rm -f ~/.gdbinit
 cat <<EOF >> ~/.gdbinit
 source /usr/share/gdb/python/exploitable/exploitable.py
+source /usr/share/gdb/python/gdb-orthrus/orthrus.py
 set auto-load safe-path /
 
 define hook-quit
@@ -74,7 +92,6 @@ define printfault
     printf "Faulting mem location is %#lx, pc is %#lx, rsp is %#lx, rbp is %#lx\n", \$_siginfo._sifields._sigfault.si_addr, \$pc, \$rsp, \$rbp
 end
 EOF
-fi
 
 if [ ! -e workspace ]; then
 echo -e "\t[+] Creating workspace and fetching a couple of production codebases"
@@ -101,7 +118,7 @@ let "count = 0"
 for crashing_input in \$(ls tests/SESSION*/crashes/id*); do
         let "count += 1"
         echo -e "--------- Crashing input no. \$count ----------"
-        gdb -q -ex="r test-flows tests/flows "\$crashing_input" &> /dev/null" -ex="echo \nProgram state:\n" -ex=printfault -ex="echo \nProgram back trace:\n" -ex=bt -ex="echo \nGDB exploitable info:\n" -ex=exploitable -ex=quit --args ./tests/ovstest
+        gdb -q -ex="set args test-flows tests/flows "\$crashing_input" &> /dev/null" -ex="run" -ex="orthrus" -ex="gcore core" -ex="quit" --args ./tests/ovstest
         echo -e "----------------------------------------------"
         echo -e ""
 done
@@ -128,7 +145,7 @@ let "count = 0"
 for crashing_input in \$(ls afl-out-clone/SESSION*/crashes/id*); do
         let "count += 1"
         echo -e "--------- Crashing input no. \$count ----------"
-        LD_PRELOAD="../osipparser2/.libs/libosipparser2.so" gdb -q -ex="r "\$crashing_input" 0 -c &> /dev/null" -ex="echo \nProgram state:\n" -ex=printfault -ex="echo \nProgram back trace:\n" -ex=bt -ex="echo \nGDB exploitable info:\n" -ex=exploitable -ex=quit --args .libs/torture_test
+        LD_PRELOAD="../osipparser2/.libs/libosipparser2.so" gdb -q -ex="set args "\$crashing_input" 0 -c &> /dev/null" -ex="run" -ex="orthrus" -ex="gcore core" -ex=quit --args .libs/torture_test
         echo -e "----------------------------------------------"
         echo -e ""
 done
