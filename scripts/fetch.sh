@@ -78,7 +78,7 @@ fi
 
 echo -e "\t[+] Setting up gdb"
 echo -e "\t\t[+] Setting up .gdbinit"
-rm ~/.gdbinit
+rm -f ~/.gdbinit
 cat <<EOF >> ~/.gdbinit
 source /usr/share/gdb/python/exploitable/exploitable.py
 source /usr/share/gdb/python/gdb-orthrus/orthrus.py
