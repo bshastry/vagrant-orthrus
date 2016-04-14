@@ -39,11 +39,13 @@ sudo python2 setup.py install &> /dev/null
 cd ..
 fi
 
+if [ ! -e ~/.ssh/known_hosts ]; then
 echo -e "\t\t[+] Adding SecT gitlab public key to known hosts"
 HOST="gitlab.sec.t-labs.tu-berlin.de"
 touch ~/.ssh/known_hosts
 ssh-keyscan -t rsa,dsa $HOST 2>&1 | sort -u - ~/.ssh/known_hosts > ~/.ssh/tmp_hosts
 cat ~/.ssh/tmp_hosts >> ~/.ssh/known_hosts
+fi
 
 if [ ! -e joern-tools ]; then
 echo -e "\t\t[+] Installing joern tools"
@@ -61,15 +63,18 @@ sudo cp -r ./gdb-orthrus /usr/share/gdb/python/ &> /dev/null
 cd ..
 fi
 
-if [ ! -e afl* ]; then
+if [ ! -d afl-cov ]; then
 echo -e "\t[+] Installing afl-fuzz latest"
 wget http://lcamtuf.coredump.cx/afl/releases/afl-latest.tgz &> /dev/null
 tar xzf afl-latest.tgz && rm afl-latest.tgz && cd afl*
 make -j &> /dev/null && sudo make install &> /dev/null && cd ..
+echo -e "\t\t[+] Installing afl-cov"
+git clone https://github.com/mrash/afl-cov.git &> /dev/null
+sudo update-alternatives --install /usr/local/bin/afl-cov afl-cov $HOME/afl-cov/afl-cov 50 &> /dev/null
 fi
 
 if [ ! -e exploitable ]; then
-echo -e "\t\t[+] Install gdb exploitable plugin"
+echo -e "\t[+] Install gdb exploitable plugin"
 git clone https://github.com/jfoote/exploitable.git &> /dev/null
 cd exploitable && python setup.py build &> /dev/null
 sudo cp -r build/lib*/exploitable /usr/share/gdb/python/ &> /dev/null
@@ -100,9 +105,9 @@ echo -e "\t\t[+] Fetching (buggy) OpenvSwitch 2.3.2"
 wget http://openvswitch.org/releases/openvswitch-2.3.2.tar.gz &> /dev/null
 tar xzf openvswitch-2.3.2.tar.gz && rm openvswitch-2.3.2.tar.gz && cd openvswitch-2.3.2
 
-echo -e "\t\t[+] Fetching crashing inputs for test-flows"
-cd tests && wget --no-check-certificate "https://owncloud.sec.t-labs.tu-berlin.de/owncloud/public.php?service=files&t=43e3207d49afe11ab0923b20a80bbff9&download" -O afl-crashes.tar.gz &> /dev/null
-tar -xzf afl-crashes.tar.gz && rm afl-crashes.tar.gz
+echo -e "\t\t[+] Fetching afl-out for test-flows"
+cd tests && wget --no-check-certificate "https://owncloud.sec.t-labs.tu-berlin.de/owncloud/public.php?service=files&t=3327d562345a3c2cbb306d9781b55bd0&download" -O afl-out.tar.gz &> /dev/null
+tar -xzf afl-out.tar.gz && rm afl-out.tar.gz
 echo -e "\t\t[+] Patching test-flows.c so it reads from file instead of stdin"
 patch -p1 test-flows.c < patch-testflows &> /dev/null
 echo -e "\t\t[+] Building OVS 2.3.2"
@@ -115,7 +120,7 @@ echo -e "\t\t\t[+] To obtain a full crash.log, run getcrashlog.sh till it return
 cat <<EOF >> getcrashlog.sh
 #!/usr/bin/env bash
 let "count = 0"
-for crashing_input in \$(ls tests/SESSION*/crashes/id*); do
+for crashing_input in \$(ls tests/afl-out/SESSION*/crashes/id*); do
         let "count += 1"
         echo -e "--------- Crashing input no. \$count ----------"
         gdb -q -ex="set args test-flows tests/flows "\$crashing_input" &> /dev/null" -ex="run" -ex="orthrus" -ex="gcore core" -ex="quit" --args ./tests/ovstest
@@ -133,8 +138,8 @@ echo -e "\t\t[+] Building libosip"
 cd libosip2-4.1.0 && CFLAGS="-O0 -g" ./configure --enable-test &> /dev/null && make &> /dev/null
 cd src/test && make check &> /dev/null
 echo -e "\t\t[+] Fetching crashing inputs for torture_test"
-wget --no-check-certificate "https://owncloud.sec.t-labs.tu-berlin.de/owncloud/public.php?service=files&t=4b76def98a54a2a1a1a06df8c74980a3&download" -O afl-crashes.tar.gz &> /dev/null
-tar -xzf afl-crashes.tar.gz && rm afl-crashes.tar.gz
+wget --no-check-certificate "https://owncloud.sec.t-labs.tu-berlin.de/owncloud/public.php?service=files&t=6258589b8121c7c39c7d962189169f2f&download" -O afl-out.tar.gz &> /dev/null
+tar -xzf afl-out.tar.gz && rm afl-out.tar.gz
 echo -e "\t\t[+] Creating sample crash.log for libosip-4.1.0"
 echo -e "\t\t\t[+] Please wait...This takes approximately 2 minutes"
 echo -e "\t\t\t[+] To obtain a full crash.log, run getcrashlog.sh till it returns"
@@ -142,7 +147,7 @@ echo -e "\t\t\t[+] To obtain a full crash.log, run getcrashlog.sh till it return
 cat <<EOF >> getcrashlog.sh
 #!/usr/bin/env bash
 let "count = 0"
-for crashing_input in \$(ls afl-out-clone/SESSION*/crashes/id*); do
+for crashing_input in \$(ls afl-out-clone/summary/crashes/id*); do
         let "count += 1"
         echo -e "--------- Crashing input no. \$count ----------"
         LD_PRELOAD="../osipparser2/.libs/libosipparser2.so" gdb -q -ex="set args "\$crashing_input" 0 -c &> /dev/null" -ex="run" -ex="orthrus" -ex="gcore core" -ex=quit --args .libs/torture_test
