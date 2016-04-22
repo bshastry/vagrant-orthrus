@@ -75,7 +75,7 @@ fi
 
 if [ ! -e exploitable ]; then
 echo -e "\t[+] Install gdb exploitable plugin"
-git clone https://github.com/jfoote/exploitable.git &> /dev/null
+git clone https://github.com/bshastry/exploitable.git &> /dev/null
 cd exploitable && python setup.py build &> /dev/null
 sudo cp -r build/lib*/exploitable /usr/share/gdb/python/ &> /dev/null
 cd ..
@@ -120,7 +120,7 @@ echo -e "\t\t\t[+] To obtain a full crash.log, run getcrashlog.sh till it return
 cat <<EOF >> getcrashlog.sh
 #!/usr/bin/env bash
 let "count = 0"
-for crashing_input in \$(ls tests/afl-out/SESSION*/crashes/id*); do
+for crashing_input in \$(ls tests/afl-out/summary/crashes/id*); do
         let "count += 1"
         echo -e "--------- Crashing input no. \$count ----------"
         gdb -q -ex="set args test-flows tests/flows "\$crashing_input" &> /dev/null" -ex="run" -ex="orthrus" -ex="gcore core" -ex="quit" --args ./tests/ovstest
