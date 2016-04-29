@@ -39,13 +39,11 @@ sudo python2 setup.py install &> /dev/null
 cd ..
 fi
 
-if [ ! -e ~/.ssh/known_hosts ]; then
 echo -e "\t\t[+] Adding SecT gitlab public key to known hosts"
 HOST="gitlab.sec.t-labs.tu-berlin.de"
 touch ~/.ssh/known_hosts
 ssh-keyscan -t rsa,dsa $HOST 2>&1 | sort -u - ~/.ssh/known_hosts > ~/.ssh/tmp_hosts
 cat ~/.ssh/tmp_hosts >> ~/.ssh/known_hosts
-fi
 
 if [ ! -e joern-tools ]; then
 echo -e "\t\t[+] Installing joern tools"
@@ -71,6 +69,13 @@ make -j &> /dev/null && sudo make install &> /dev/null && cd ..
 echo -e "\t\t[+] Installing afl-cov"
 git clone https://github.com/mrash/afl-cov.git &> /dev/null
 sudo update-alternatives --install /usr/local/bin/afl-cov afl-cov $HOME/afl-cov/afl-cov 50 &> /dev/null
+echo -e "\t\t[+] Install pysancov-3.8"
+wget -q https://raw.githubusercontent.com/llvm-mirror/compiler-rt/release_38/lib/sanitizer_common/scripts/sancov.py &> /dev/null
+chmod +x sancov.py &> /dev/null
+sudo mv sancov.py /usr/local/bin/pysancov &> /dev/null
+echo -e "\t\t[+] Installing afl-sancov"
+git clone git@gitlab.sec.t-labs.tu-berlin.de:collaboration/afl-sancov.git &> /dev/null
+sudo update-alternatives --install /usr/local/bin/afl-sancov afl-sancov $HOME/afl-sancov/afl-sancov.py 50 &> /dev/null
 fi
 
 if [ ! -e exploitable ]; then
