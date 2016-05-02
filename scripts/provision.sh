@@ -23,6 +23,7 @@ sudo apt-get install -y clang-3.8 libclang-common-3.8-dev llvm-3.8-runtime &> /d
 sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.8 50 &> /dev/null
 sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.8 50 &> /dev/null
 sudo update-alternatives --install /usr/bin/sancov sancov /usr/bin/sancov-3.8 50 &> /dev/null
+sudo update-alternatives --install /usr/bin/llvm-symbolizer llvm-symbolizer /usr/bin/llvm-symbolizer-3.8 50 &> /dev/null
 
 sudo ln -s /vagrant/scripts/fetch.sh /usr/local/bin/fetch &> /dev/null
 echo -e "Provisioning done. Login to provisioned VM by doing 'vagrant ssh'"
