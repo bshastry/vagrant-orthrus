@@ -83,6 +83,13 @@ rm clang-prebuilt.tar.gz
 echo -e "\t\t[+] Installing pyl2c"
 git clone git@gitlab.sec.t-labs.tu-berlin.de:static-analysis/pyl2c.git &> /dev/null
 sudo update-alternatives --install /usr/local/bin/pyl2c pyl2c $HOME/pyl2c/pyl2c.py 50 &> /dev/null
+echo -e "\t\t[+] Installing bear"
+git clone https://github.com/rizsotto/Bear.git &> /dev/null
+mkdir -p build_Bear && cd build_Bear
+cmake ../Bear &> /dev/null
+make all &> /dev/null
+sudo make install &> /dev/null
+cd .. && rm -rf build_Bear
 fi
 
 if [ ! -e exploitable ]; then
