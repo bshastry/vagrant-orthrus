@@ -74,7 +74,7 @@ wget -q https://raw.githubusercontent.com/llvm-mirror/compiler-rt/release_38/lib
 chmod +x sancov.py &> /dev/null
 sudo mv sancov.py /usr/local/bin/pysancov &> /dev/null
 echo -e "\t\t[+] Installing afl-sancov"
-git clone git@gitlab.sec.t-labs.tu-berlin.de:collaboration/afl-sancov.git --branch mindiff &> /dev/null
+git clone git@gitlab.sec.t-labs.tu-berlin.de:collaboration/afl-sancov.git --branch mindiff-mod &> /dev/null
 sudo update-alternatives --install /usr/local/bin/afl-sancov afl-sancov $HOME/afl-sancov/afl-sancov.py 50 &> /dev/null
 echo -e "\t\t[+] Installing prebuilt clang"
 wget --no-check-certificate "https://owncloud.sec.t-labs.tu-berlin.de/owncloud/public.php?service=files&t=d43c249e3eb3cd908253009578a6a167&download" -O clang-prebuilt.tar.gz &> /dev/null
