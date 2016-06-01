@@ -77,7 +77,7 @@ echo -e "\t\t[+] Installing afl-sancov"
 git clone git@gitlab.sec.t-labs.tu-berlin.de:collaboration/afl-sancov.git --branch mindiff-mod &> /dev/null
 sudo update-alternatives --install /usr/local/bin/afl-sancov afl-sancov $HOME/afl-sancov/afl-sancov.py 50 &> /dev/null
 echo -e "\t\t[+] Installing prebuilt clang"
-wget --no-check-certificate "https://owncloud.sec.t-labs.tu-berlin.de/owncloud/public.php?service=files&t=d43c249e3eb3cd908253009578a6a167&download" -O clang-prebuilt.tar.gz &> /dev/null
+wget --no-check-certificate "https://owncloud.sec.t-labs.tu-berlin.de/owncloud/public.php?service=files&t=bdada03443f2ec3502ceedf8265535f8&download" -O clang-prebuilt.tar.gz &> /dev/null
 tar xzf clang-prebuilt.tar.gz &> /dev/null
 rm clang-prebuilt.tar.gz
 echo -e "\t\t[+] Installing pyl2c"
