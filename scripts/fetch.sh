@@ -13,13 +13,14 @@ tar xfz 0.3.1.tar.gz && rm 0.3.1.tar.gz
 cd joern-0.3.1 && wget http://mlsec.org/joern/lib/lib.tar.gz &> /dev/null
 tar xfz lib.tar.gz && rm lib.tar.gz
 ant &> /dev/null && ant tools &> /dev/null
+cd ..
 echo "alias joern='java -jar `pwd`/bin/joern.jar'" > ~/.bash_aliases
 source ~/.bashrc
 fi
 
 if [ ! -e neo4j-community-2.1.8 ]; then
 echo -e "\t\t[+] Installing Neo4J 2.1.8"
-cd .. && wget http://neo4j.com/artifact.php?name=neo4j-community-2.1.8-unix.tar.gz -O neo4j-community-2.1.8-unix.tar.gz &> /dev/null
+wget http://neo4j.com/artifact.php?name=neo4j-community-2.1.8-unix.tar.gz -O neo4j-community-2.1.8-unix.tar.gz &> /dev/null
 tar xzf neo4j-community-2.1.8-unix.tar.gz && rm neo4j-community-2.1.8-unix.tar.gz
 echo "export Neo4jDir=`pwd`/neo4j-community-2.1.8" >> ~/.bash_aliases
 source ~/.bashrc
@@ -83,6 +84,7 @@ rm clang-prebuilt.tar.gz
 echo -e "\t\t[+] Installing pyl2c"
 git clone git@gitlab.sec.t-labs.tu-berlin.de:static-analysis/pyl2c.git &> /dev/null
 sudo update-alternatives --install /usr/local/bin/pyl2c pyl2c $HOME/pyl2c/pyl2c.py 50 &> /dev/null
+sudo pip install numpy matplotlib &> /dev/null
 echo -e "\t\t[+] Installing bear"
 git clone https://github.com/rizsotto/Bear.git &> /dev/null
 mkdir -p build_Bear && cd build_Bear
