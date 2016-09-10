@@ -19,7 +19,8 @@ sudo apt-get install -y cmake make tmux git \
 	graphviz libgraphviz-dev python-setuptools python-dev \
 	libz-dev libncurses5-dev ant execstack autoconf \
 	transfig makeinfo libstdc++6 python3-pip \
-	libpng-dev libfreetype6-dev libxft-dev &> /dev/null
+	libpng-dev libfreetype6-dev libxft-dev \
+	gccgo-go &> /dev/null
 
 echo -e "Installing clang 3.8 and all associated runtime libs"
 sudo apt-get install -y clang-3.8 libclang-common-3.8-dev llvm-3.8-runtime &> /dev/null

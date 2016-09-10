@@ -8,9 +8,9 @@ Vagrant.configure(2) do |config|
   end
   config.vm.provider "virtualbox" do |v|
 	v.name = "joern-runtime-vm"
-	v.customize ["modifyvm", :id, "--cpuexecutioncap", "50"]
+	v.customize ["modifyvm", :id, "--cpuexecutioncap", "100"]
 	v.memory = 4096
-	v.cpus = 1
+	v.cpus = 2
   end
   config.ssh.forward_agent = true 
   config.ssh.forward_x11 = true

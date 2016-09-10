@@ -48,7 +48,9 @@ cat ~/.ssh/tmp_hosts >> ~/.ssh/known_hosts
 
 if [ ! -e joern-tools ]; then
 echo -e "\t\t[+] Installing joern tools"
-git clone git@gitlab.sec.t-labs.tu-berlin.de:mleutner/joern-tools.git &> /dev/null
+# Switch to runtime during clone
+sudo pip2 install docutils &> /dev/null
+git clone git@gitlab.sec.t-labs.tu-berlin.de:mleutner/joern-tools.git --branch runtime &> /dev/null
 cd joern-tools && sudo python2 setup.py install &> /dev/null
 cd ..
 fi
@@ -78,7 +80,8 @@ echo -e "\t\t[+] Installing afl-sancov"
 git clone git@gitlab.sec.t-labs.tu-berlin.de:collaboration/afl-sancov.git --branch mindiff-mod &> /dev/null
 sudo update-alternatives --install /usr/local/bin/afl-sancov afl-sancov $HOME/afl-sancov/afl-sancov.py 50 &> /dev/null
 echo -e "\t\t[+] Installing prebuilt clang"
-wget --no-check-certificate "https://owncloud.sec.t-labs.tu-berlin.de/owncloud/public.php?service=files&t=bdada03443f2ec3502ceedf8265535f8&download" -O clang-prebuilt.tar.gz &> /dev/null
+#https://owncloud.sec.t-labs.tu-berlin.de/owncloud/public.php?service=files&t=4f1b6bdd684d136a94575283a71ed215
+wget --no-check-certificate "https://owncloud.sec.t-labs.tu-berlin.de/owncloud/public.php?service=files&t=136e8259e56784972e3bcd05554421d1&download" -O clang-prebuilt.tar.gz &> /dev/null
 tar xzf clang-prebuilt.tar.gz &> /dev/null
 rm clang-prebuilt.tar.gz
 echo -e "\t\t[+] Installing pyl2c"
