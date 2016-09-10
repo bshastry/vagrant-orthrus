@@ -14,6 +14,4 @@ $ tmux
 $ fetch
 ```
 
-If something doesn't work as expected, please ping me/file issues. This was hacked together one Friday afternoon, so flakiness expected ;-)
-
 [1]: https://www.vagrantup.com/
